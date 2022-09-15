@@ -21,7 +21,7 @@ import javax.swing.filechooser.FileSystemView;
 public class Always_Shortcut {
 
 	public static File Shortcut_file = new File(System.getProperty("user.home") + "/Desktop/ショートカット");
-	public static ArrayList<ShortcutData> Shortcut_List = new ArrayList<ShortcutData>();
+	public static ArrayList<Button> Shortcut_List = new ArrayList<Button>();
 
 	static JFrame jf = new JFrame();
 	static Canvas canvas = new Canvas();
@@ -33,7 +33,7 @@ public class Always_Shortcut {
 	}
 
 	public static void set_frame(JFrame jf) {
-		jf.setBounds(0, 0, 720, 720);
+		jf.setBounds(0, 0, 750, 730);
 		jf.setVisible(true);
 		jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		jf.add(canvas);
@@ -52,12 +52,27 @@ public class Always_Shortcut {
 
 		};
 		File[] list = shortcut_file.listFiles(filter);
+		Image check_null = ((ImageIcon) UIManager.getIcon("FileView.fileIcon")).getImage();
 
+		int x = 0, y = 0;
 		Shortcut_List.clear();
 		for (File select : list) {
-			ImageIcon icon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(select);
-			String name = select.getName().substring(0, select.getName().indexOf("."));
-			Shortcut_List.add(new ShortcutData(select, icon.getImage(), name));
+			if (x / 7 == 1) {
+				x = 0;
+				y++;
+			} else {
+				x++;
+			}
+			Image icon = ((ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(select))
+					.getImage();
+			String name[] = {
+					select.getName().substring(0, select.getName().indexOf(".")), select.getAbsolutePath()
+			};
+			if (name[0].length() >= 10) {
+				name[0] = name[0].substring(0, 10) + "\n" + name[0].substring(10);
+			}
+			Shortcut_List.add(new Button(name, x * 90 + 5, y * 100 + 5, 1, icon));
+			//Shortcut_List.add(new ShortcutData(select, icon.getImage(), name));
 			System.out.println(select);
 		}
 	}
@@ -89,11 +104,12 @@ class Canvas extends JPanel implements ActionListener {
 		offImage = createImage(Always_Shortcut.jf.getWidth(), Always_Shortcut.jf.getHeight());
 		offGraphics = offImage.getGraphics();
 
-		offGraphics.setFont(new Font("ＭＳ ゴシック", Font.PLAIN, 10));
+		offGraphics.setFont(new Font("ＭＳ ゴシック", Font.PLAIN, 14));
 
 		int i = 0;
 		int j = 0;
 		for (int t = 0, k = Always_Shortcut.Shortcut_List.size(); k > t; t++) {
+			Button select = Always_Shortcut.Shortcut_List.get(t);
 			// System.out.println(t);
 			if (i / 7 == 1) {
 				i = 0;
@@ -101,10 +117,16 @@ class Canvas extends JPanel implements ActionListener {
 			} else {
 				i++;
 			}
-			offGraphics.drawImage(Always_Shortcut.Shortcut_List.get(t).img, i * 90 + 5, j * 90 + 5, 64, 64, null);
-			offGraphics.drawString(Always_Shortcut.Shortcut_List.get(t).name, i * 90 + 5, j * 90 + 80);
+			offGraphics.drawImage(select.img, i * 90 + 5, j * 100 + 5, null);
+			if (select.Name[0].indexOf("\n") != -1) {
+				int time = -1;
+				for (String text : select.Name[0].split("\n")) {
+					offGraphics.drawString(text, i * 90 + 5,
+							j * 100 + 80 + g.getFontMetrics().getHeight() * (time += 1) + 5);
+				}
+			} else
+				offGraphics.drawString(select.Name[0], i * 90 + 5, j * 100 + 80 + 5);
 		}
-
 		g.drawImage(offImage, 0, 0, null);
 	}
 
